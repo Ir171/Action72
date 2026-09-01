@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Проверьте расчет сверхурочных</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: #f6f9fc;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      margin: 0;
+    }
+
+    .card {
+      background: #ffffff;
+      max-width: 780px;
+      width: 100%;
+      border-radius: 24px;
+      box-shadow: 0 12px 32px -8px rgba(0, 20, 40, 0.15);
+      padding: 24px 28px 28px;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 18px 14px 20px;
+        border-radius: 16px;
+      }
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #0b1e33;
+      margin-bottom: 4px;
+    }
+
+    .condition {
+      background: #f8faff;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      border: 1px solid #e6edf4;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1a2b3e;
+    }
+
+    .condition strong {
+      color: #0047b3;
+    }
+
+    .condition .line {
+      display: block;
+    }
+
+    .warning {
+      background: #fff8e1;
+      border-left: 4px solid #f9a825;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #5d4e2e;
+      margin-bottom: 14px;
+    }
+
+    .task-block {
+      margin-top: 4px;
+    }
+
+    .step {
+      background: #fafcff;
+      border-radius: 12px;
+      padding: 12px 14px 14px;
+      margin-bottom: 12px;
+      border: 1px solid #eef4fa;
+    }
+
+    .step-title {
+      font-weight: 600;
+      font-size: 15px;
+      color: #0b2a4a;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-title .badge {
+      background: #2d7aff;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 0 10px;
+      border-radius: 40px;
+      line-height: 22px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 12px;
+      margin-bottom: 6px;
+    }
+
+    .field-group label {
+      font-weight: 500;
+      font-size: 14px;
+      color: #1f3a57;
+      min-width: 130px;
+    }
+
+    .field-group .hint {
+      font-size: 13px;
+      color: #5e7a99;
+      background: #eef4fa;
+      padding: 1px 10px;
+      border-radius: 40px;
+      white-space: nowrap;
+      display: none;
+      flex-shrink: 0;
+    }
+
+    .field-group .hint.visible {
+      display: inline-block;
+    }
+
+    .field-group input {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      padding: 6px 10px;
+      width: 130px;
+      border: 2px solid #d7e1ec;
+      border-radius: 10px;
+      background: #ffffff;
+      transition: border 0.2s, box-shadow 0.2s;
+      color: #0b1e33;
+      font-weight: 500;
+      outline: none;
+      flex-shrink: 0;
+    }
+
+    .field-group input:focus {
+      border-color: #2d7aff;
+      box-shadow: 0 0 0 3px rgba(45, 122, 255, 0.12);
+    }
+
+    .field-group input.correct {
+      border-color: #1d9b6b;
+      background: #f0faf6;
+    }
+
+    .field-group input.wrong {
+      border-color: #d94a4a;
+      background: #fef0f0;
+    }
+
+    .field-group .result-icon {
+      font-size: 18px;
+      margin-left: 2px;
+      width: 22px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      padding: 8px 22px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-primary {
+      background: #0047b3;
+      color: #ffffff;
+      box-shadow: 0 4px 10px rgba(0, 71, 179, 0.2);
+    }
+    .btn-primary:hover {
+      background: #003a97;
+    }
+
+    .btn-secondary {
+      background: #e6edf6;
+      color: #1f3a57;
+    }
+    .btn-secondary:hover {
+      background: #d5e0ed;
+    }
+
+    .btn-success {
+      background: #1d9b6b;
+      color: #fff;
+    }
+    .btn-success:hover {
+      background: #168259;
+    }
+
+    .summary {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: #f2f7ff;
+      border: 1px solid #cfe0f5;
+      display: none;
+    }
+
+    .summary.visible {
+      display: block;
+    }
+
+    .summary h3 {
+      font-weight: 600;
+      font-size: 15px;
+      color: #0b2a4a;
+      margin-bottom: 4px;
+    }
+
+    .summary p {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #1f3a57;
+    }
+
+    .summary .ok {
+      color: #1d9b6b;
+      font-weight: 600;
+    }
+    .summary .err {
+      color: #c73a3a;
+      font-weight: 600;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Проверьте расчет сверхурочных</h1>
+
+    <div class="condition">
+      <strong>Сотрудник Петров</strong><br />
+      <span class="line">• часовая ставка – 800 руб.</span>
+      <span class="line">• переработка за год – 180 ч (лимит повышен до 240 ч)</span>
+    </div>
+
+    <div class="warning">
+      ⚠️ Вводите числа без пробелов и запятых
+    </div>
+
+    <div class="task-block">
+      <!-- Шаг 1 -->
+      <div class="step">
+        <div class="step-title"><span class="badge">1</span> Оплата в пределах 120 часов</div>
+
+        <div class="field-group">
+          <label>Первые 2 ч (× 1,5):</label>
+          <input type="number" id="first2" placeholder="число" />
+          <span class="hint" id="hint-first2">2 × 800 × 1,5</span>
+          <span class="result-icon" id="icon-first2"></span>
+        </div>
+
+        <div class="field-group">
+          <label>Оставшиеся 118 ч (× 2):</label>
+          <input type="number" id="rest118" placeholder="число" />
+          <span class="hint" id="hint-rest118">118 × 800 × 2</span>
+          <span class="result-icon" id="icon-rest118"></span>
+        </div>
+
+        <div class="field-group">
+          <label><strong>Итого за 120 ч:</strong></label>
+          <input type="number" id="total120" placeholder="число" style="font-weight:600;" />
+          <span class="hint" id="hint-total120">сумма первых двух</span>
+          <span class="result-icon" id="icon-total120"></span>
+        </div>
+      </div>
+
+      <!-- Шаг 2 -->
+      <div class="step">
+        <div class="step-title"><span class="badge">2</span> Часы сверх 120 (с 121‑го по 180‑й)</div>
+        <div class="field-group">
+          <label>60 ч × 800 × 2:</label>
+          <input type="number" id="over120" placeholder="число" />
+          <span class="hint" id="hint-over120">(180 − 120) × 800 × 2</span>
+          <span class="result-icon" id="icon-over120"></span>
+        </div>
+      </div>
+
+      <!-- Шаг 3 -->
+      <div class="step" style="background:#f2f9fe; border-color:#b9d4f0;">
+        <div class="step-title"><span class="badge" style="background:#0047b3;">3</span> Всего к начислению</div>
+        <div class="field-group">
+          <label style="font-weight:700; font-size:16px;">Сумма:</label>
+          <input type="number" id="grandTotal" placeholder="число" style="font-weight:700; font-size:16px; width:150px;" />
+          <span class="hint" id="hint-grandTotal">191 200 + 96 000</span>
+          <span class="result-icon" id="icon-grandTotal"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Кнопки -->
+    <div class="actions">
+      <div>
+        <button class="btn btn-primary" id="checkBtn">✅ Проверить</button>
+        <button class="btn btn-secondary" id="resetBtn">⟲ Сбросить</button>
+      </div>
+      <button class="btn btn-secondary" id="showAnswersBtn">📖 Показать ответы</button>
+    </div>
+
+    <!-- Сводка -->
+    <div class="summary" id="summary">
+      <h3>Результат проверки</h3>
+      <p id="summaryText"></p>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const CORRECT = {
+        first2: 2400,
+        rest118: 188800,
+        total120: 191200,
+        over120: 96000,
+        grandTotal: 287200
+      };
+
+      const inputFirst2 = document.getElementById('first2');
+      const inputRest118 = document.getElementById('rest118');
+      const inputTotal120 = document.getElementById('total120');
+      const inputOver120 = document.getElementById('over120');
+      const inputGrand = document.getElementById('grandTotal');
+
+      const hintFirst2 = document.getElementById('hint-first2');
+      const hintRest118 = document.getElementById('hint-rest118');
+      const hintTotal120 = document.getElementById('hint-total120');
+      const hintOver120 = document.getElementById('hint-over120');
+      const hintGrand = document.getElementById('hint-grandTotal');
+
+      const iconFirst2 = document.getElementById('icon-first2');
+      const iconRest118 = document.getElementById('icon-rest118');
+      const iconTotal120 = document.getElementById('icon-total120');
+      const iconOver120 = document.getElementById('icon-over120');
+      const iconGrand = document.getElementById('icon-grandTotal');
+
+      const summaryDiv = document.getElementById('summary');
+      const summaryText = document.getElementById('summaryText');
+
+      function toggleHint(input, hintElement) {
+        const val = input.value.trim();
+        if (val !== '') {
+          hintElement.classList.add('visible');
+        } else {
+          hintElement.classList.remove('visible');
+        }
+      }
+
+      function setupHintToggle(input, hint) {
+        input.addEventListener('input', function() {
+          toggleHint(this, hint);
+          this.classList.remove('correct', 'wrong');
+          summaryDiv.classList.remove('visible');
+          const iconMap = {
+            'first2': iconFirst2,
+            'rest118': iconRest118,
+            'total120': iconTotal120,
+            'over120': iconOver120,
+            'grandTotal': iconGrand
+          };
+          const icon = iconMap[this.id];
+          if (icon) icon.textContent = '';
+        });
+        toggleHint(input, hint);
+      }
+
+      setupHintToggle(inputFirst2, hintFirst2);
+      setupHintToggle(inputRest118, hintRest118);
+      setupHintToggle(inputTotal120, hintTotal120);
+      setupHintToggle(inputOver120, hintOver120);
+      setupHintToggle(inputGrand, hintGrand);
+
+      function clearStatus() {
+        [inputFirst2, inputRest118, inputTotal120, inputOver120, inputGrand].forEach(inp => {
+          inp.classList.remove('correct', 'wrong');
+        });
+        [iconFirst2, iconRest118, iconTotal120, iconOver120, iconGrand].forEach(ic => ic.textContent = '');
+        summaryDiv.classList.remove('visible');
+      }
+
+      function checkField(input, correctValue, iconElement) {
+        const val = input.value.trim().replace(/\s/g, '');
+        if (val === '') {
+          input.classList.remove('correct', 'wrong');
+          iconElement.textContent = '';
+          return null;
+        }
+        const num = Number(val);
+        if (isNaN(num)) {
+          input.classList.remove('correct');
+          input.classList.add('wrong');
+          iconElement.textContent = '❌';
+          return false;
+        }
+        if (num === correctValue) {
+          input.classList.remove('wrong');
+          input.classList.add('correct');
+          iconElement.textContent = '✅';
+          return true;
+        } else {
+          input.classList.remove('correct');
+          input.classList.add('wrong');
+          iconElement.textContent = '❌';
+          return false;
+        }
+      }
+
+      function checkAll() {
+        const resFirst2 = checkField(inputFirst2, CORRECT.first2, iconFirst2);
+        const resRest118 = checkField(inputRest118, CORRECT.rest118, iconRest118);
+        const resTotal120 = checkField(inputTotal120, CORRECT.total120, iconTotal120);
+        const resOver120 = checkField(inputOver120, CORRECT.over120, iconOver120);
+        const resGrand = checkField(inputGrand, CORRECT.grandTotal, iconGrand);
+
+        const allFilled = [inputFirst2, inputRest118, inputTotal120, inputOver120, inputGrand].every(
+          inp => inp.value.trim() !== ''
+        );
+
+        if (!allFilled) {
+          summaryDiv.classList.add('visible');
+          summaryText.innerHTML = '⚠️ Заполните все поля перед проверкой.';
+          return;
+        }
+
+        const results = [resFirst2, resRest118, resTotal120, resOver120, resGrand];
+        const allCorrect = results.every(r => r === true);
+        const anyWrong = results.some(r => r === false);
+
+        summaryDiv.classList.add('visible');
+        if (allCorrect) {
+          summaryText.innerHTML = '<span class="ok">✅ Отлично! Все расчеты верны.</span> Петрову начислено <strong>287 200 руб.</strong> за сверхурочную работу.';
+        } else if (anyWrong) {
+          summaryText.innerHTML = '<span class="err">❌ Есть ошибки. Проверьте выделенные красным поля.</span> Можете списать: у вас есть подсказки, которые появляются при вводе.';
+        } else {
+          summaryText.innerHTML = '⚠️ Проверьте введённые значения.';
+        }
+      }
+
+      function resetAll() {
+        [inputFirst2, inputRest118, inputTotal120, inputOver120, inputGrand].forEach(inp => {
+          inp.value = '';
+          inp.classList.remove('correct', 'wrong');
+        });
+        [hintFirst2, hintRest118, hintTotal120, hintOver120, hintGrand].forEach(h => h.classList.remove('visible'));
+        [iconFirst2, iconRest118, iconTotal120, iconOver120, iconGrand].forEach(ic => ic.textContent = '');
+        summaryDiv.classList.remove('visible');
+      }
+
+      function showAnswers() {
+        inputFirst2.value = CORRECT.first2;
+        inputRest118.value = CORRECT.rest118;
+        inputTotal120.value = CORRECT.total120;
+        inputOver120.value = CORRECT.over120;
+        inputGrand.value = CORRECT.grandTotal;
+        [hintFirst2, hintRest118, hintTotal120, hintOver120, hintGrand].forEach(h => h.classList.add('visible'));
+        checkAll();
+      }
+
+      document.getElementById('checkBtn').addEventListener('click', checkAll);
+      document.getElementById('resetBtn').addEventListener('click', resetAll);
+      document.getElementById('showAnswersBtn').addEventListener('click', showAnswers);
+    })();
+  </script>
+</body>
+</html>
